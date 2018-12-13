@@ -36,6 +36,8 @@ public class SendJobToXcc2 {
     private static int sequenceNum=0;/*发送给XCC的指令的序号*/
     private MessageForm messageForm;
     private static ConcurrentLinkedQueue<MessageForm> sendMessageRecordQueue = new ConcurrentLinkedQueue<MessageForm>();/*记录发送给XCC的作业*/
+    private boolean isSuccess=false;
+    private ConcurrentLinkedQueue<MessageForm> waitToSendJobQueue=new ConcurrentLinkedQueue<MessageForm>();/*用于接收等待发送的作业*/
 
     public static void deleteSendMessageRecordQueue(String jobId) {
         for (MessageForm messageForm : sendMessageRecordQueue) {
@@ -46,9 +48,6 @@ public class SendJobToXcc2 {
                     sendMessageRecordQueue.size();
                     loggerInfo.info("已经成功删除记录XJD发送给XCC作业的队列中，任务已被XCC执行完毕的作业信息");
                 }
-            } else {
-                loggerInfo.info("记录XJD发送给XCC作业的队列中不存在jobId为：" + jobId + "的记录");
-                loggError.error("记录XJD发送给XCC作业的队列中不存在jobId为：" + jobId + "的记录");
             }
         }
 
@@ -139,7 +138,7 @@ public class SendJobToXcc2 {
         calendar.setTime(new Date());
         long millis=calendar.getTimeInMillis();
         for(ConcurrentHashMap.Entry<String, Long> entry:sendTimeAndJobIdMap.entrySet()) {
-            System.out.println("记录的马匹，和计算的值"+entry.getKey()+"\\"+String.valueOf(millis-entry.getValue())+"\\"+sendTimeAndJobIdMap.toString());
+            System.out.println("记录的Map，和计算的值"+entry.getKey()+"\\"+String.valueOf(millis-entry.getValue())+"\\"+sendTimeAndJobIdMap.toString());
             if(millis-entry.getValue()>MAXINTERVAL){
                 String jobid= entry.getKey();
                 loggerInfo.info("jobId为："+jobid+"的作业超时未被XCC接收，需要重新发给XCC");
@@ -192,20 +191,6 @@ public class SendJobToXcc2 {
                                 loggerInfo.info("该XccID未注册："+xccId);
                             }
 
-                            /*if(comLink2!=null){
-                                loggerInfo.info("XJD正在重新将超时未被接受的单条作业指令发给XCC_ONE,作业指令为："+messageForm.toString());
-                                if(  comLink2.send(new Message(messageForm.toString()))){
-                                    String jobId= messageForm.getParameter().get("jobId").toString();*//*将jobid取出存入sendJobIDQueue*//*
-                                    calendar.setTime(new Date());
-                                    sendTimeAndJobIdMap.computeIfPresent(jobId,(k,v)->v=calendar.getTimeInMillis());
-                                    loggerInfo.info("已发送");
-                                }else{
-                                    loggerInfo.info("发送失败");
-                                    loggError.error("发送失败");
-                                }
-                            }else{
-                                loggerInfo.info("与XCCone的连接已断开，无法发送超时信息");
-                            }*/
                         }
                     }
                 }else{
@@ -227,42 +212,8 @@ public class SendJobToXcc2 {
         public void accept(Object o) {
         }
     }
-    public static void main(String[] args){
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date());
-        System.out.println(calendar.getTimeInMillis());
 
-       /* Map map = new HashMap();
-        map.put("sender", "XJD");
-        map.put("reciever", "XCC");
-        map.put("row", "120");
-        MessageForm msgf = new MessageForm(2,3,1,map);
 
-        ComLink serverLink = new ComLink("127.0.0.1", 8086);
-        Message message = new Message("this is a test");
-
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-        }
-
-        while (true) {
-            serverLink.send(message);
-            MessageForm msgreci = serverLink.getMessage();
-            System.out.println("client main "+msgreci.getClassNum());
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
-*/
-    }
-    private boolean isSuccess=false;
-    private ConcurrentLinkedQueue<MessageForm> waitToSendJobQueue=new ConcurrentLinkedQueue<MessageForm>();
     public void sendPickUpChassisJob2(List<Map> parameters) throws InterruptedException {
         waitToSendJobQueue.addAll(returnDischargeMessageList(parameters));
         for(MessageForm messageForm:waitToSendJobQueue){
@@ -319,6 +270,40 @@ public class SendJobToXcc2 {
         }
         /* xccListener.run();*/
 
+    }
+    public static void main(String[] args){
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        System.out.println(calendar.getTimeInMillis());
+
+       /* Map map = new HashMap();
+        map.put("sender", "XJD");
+        map.put("reciever", "XCC");
+        map.put("row", "120");
+        MessageForm msgf = new MessageForm(2,3,1,map);
+
+        ComLink serverLink = new ComLink("127.0.0.1", 8086);
+        Message message = new Message("this is a test");
+
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+
+        while (true) {
+            serverLink.send(message);
+            MessageForm msgreci = serverLink.getMessage();
+            System.out.println("client main "+msgreci.getClassNum());
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+*/
     }
 }
 

@@ -17,9 +17,9 @@
          hostName : 本地机器名
          hostAddress : 本地ip地址 -->
 <configuration status="warn" monitorInterval="30">
-    <!--文件输出地址-->
+    <!--文件输出地址${log4j:configParentLocation}-->
     <properties>
-        <property name="LOG_HOME">/check</property>
+        <property name="LOG_HOME">check</property>
     </properties>
     <!--先定义所有的appender-->
     <appenders>

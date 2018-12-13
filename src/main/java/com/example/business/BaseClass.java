@@ -34,7 +34,9 @@ public abstract class BaseClass {
     private  Map<String,Integer> addressAndSuffixMap=InfoMaintenanceClass.addressAndSuffixMap;/*记录注册到IOC容器中的comlink对象的IP地址+端口号(key) 和 注册到容器的comlink的后缀（value）*/
     protected void ack(MessageForm messageForm) {
       /*  获取调用者的类名*/
-        String className= new Throwable().getStackTrace()[1].getClassName();
+      /*  String className= new Throwable().getStackTrace()[1].getClassName();
+        Map<String,String> param =new HashMap<String,String>(){{
+        }};*/
         Map<String,String> param =new HashMap<String,String>(){{
         }};
         String reciver = messageForm.getSender();
@@ -46,11 +48,11 @@ public abstract class BaseClass {
             ComLink2 comLink= (ComLink2) SpringUtil.getBean("comLink"+String.valueOf(suffix));/*获取xccId对应的并注册到IOC容器中的comLink对象*/
             boolean isSuccess=false;
             if(comLink!=null){
-                if( comLink.send(new Message(messageForm.toString()))){
+                if( comLink.send(new Message(reply.toString()))){
                     isSuccess=true;
-                    loggerInfo.info("成功发送确认消息给XccID:"+messageForm.getReciver());
+                    loggerInfo.info("成功发送确认消息给XccID:"+reciver);
                 }else{
-                    loggerInfo.info("发送确认失败:xccid:"+messageForm.getReciver()+"即将重新发送确认消息："+messageForm.toString());
+                    loggerInfo.info("发送确认失败:xccid:"+reciver+"即将重新发送确认消息："+messageForm.toString());
                     isSuccess=false;
                     while(!isSuccess){
                         loggerInfo.info("正在重新发送确认消息："+messageForm.toString());
@@ -59,10 +61,9 @@ public abstract class BaseClass {
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
-                        if(comLink.send(new Message(messageForm.toString()))){
+                        if(comLink.send(new Message(reply.toString()))){
                           isSuccess=true;
                             loggerInfo.info("重新发送发送确认消息成功，该条作业指令为："+messageForm.toString());
-                            String jobId= messageForm.getParameter().get("jobId").toString();/*将jobid取出存入sendJobIDQueue*/
                         }else{
                             loggerInfo.info("重新发送确认消息失败，该条作业指令为："+messageForm.toString());
                            isSuccess=false;

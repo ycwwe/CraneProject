@@ -18,15 +18,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.sun.javaws.JnlpxArgs.verify;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 
-@SpringBootTest
-@RunWith(SpringRunner.class)
+/*@SpringBootTest
+@RunWith(SpringRunner.class)*/
 public  class  DemoApplicationTests {
-
+/*
     @Before
     public void setUp() throws Exception {
         // 初始化测试用例类中由Mockito的注解标注的所有模拟对象
@@ -47,7 +47,7 @@ public  class  DemoApplicationTests {
             add(map);
         }};
         sendJobToXCC.sendPickUpChassisJob(parameters);
-    }
+    }*/
 
 
 }

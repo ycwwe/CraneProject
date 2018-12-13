@@ -4,9 +4,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
 import java.awt.*;
 import java.io.*;
 import java.nio.file.*;
+import java.util.Date;
 
 public class SwingGUI extends JFrame {
     private  static Logger loggerInfo = LogManager.getLogger("demo_info");
@@ -14,14 +19,16 @@ public class SwingGUI extends JFrame {
     private  boolean isModify=true;
     private static  File file;
     private static  RandomAccessFile randomAccessFile;
-    private static  final String FILEPATH="C:\\check\\logs\\springboot-log4j2-demo\\demo-info.log";
-    private static  final String DIRPATH="C:\\check\\logs\\springboot-log4j2-demo\\";
+    private static  final String FILEPATH=System.getProperty("user.dir")+"\\check\\logs\\springboot-log4j2-demo\\demo-info.log";
+    private static  final String DIRPATH=System.getProperty("user.dir")+"\\check\\logs\\springboot-log4j2-demo\\";
     private static String string=null;
     private static long pos=0;
     /*private static  final int TEXTAREA_ROWS=1000;
     private static  final int TEXTAREA_COLUMNS=150;*/
     private static  JTextArea textArea=new JTextArea(/*TEXTAREA_ROWS,TEXTAREA_COLUMNS*/);
-
+    private  JTextPane textPane=new JTextPane();
+    StyledDocument d=textPane.getStyledDocument();
+    SimpleAttributeSet attr = new SimpleAttributeSet();
     private static PrintStream printStream=new PrintStream(System.out){
         public void println(String string){
             textArea.append(string);
@@ -47,12 +54,25 @@ public class SwingGUI extends JFrame {
             setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);/*JFrame.EXIT_ON_CLOSE*/
             JPanel topJpanel= new JPanel();
             topJpanel.setBackground(Color.red);
+            JPanel downJpanel= new JPanel();
+            downJpanel.setBackground(Color.red);
             add(topJpanel,BorderLayout.NORTH);
+            add(downJpanel,BorderLayout.SOUTH);
             textArea.setFont(new Font("显示器",Font.PLAIN,15));
             textArea.setLineWrap(true);/*关闭横滚动条*/
             textArea.setWrapStyleWord(true);
-            JScrollPane scrollPane=new JScrollPane(textArea);
-            add(scrollPane, BorderLayout.CENTER);
+            textArea.setBackground(Color.BLACK);
+           /* JScrollPane scrollPane=new JScrollPane(textArea);
+            add(scrollPane, BorderLayout.CENTER);*/
+            JScrollPane scrollPane2=new JScrollPane(textPane);
+            textPane.setSize(350,800);
+            textPane.setBackground(Color.BLACK);
+            StyleConstants.setForeground(attr, Color.white);
+            StyleConstants.setBackground(attr,Color.BLACK);
+            StyleConstants.setFontSize(attr,16);
+            String date = String.valueOf(new Date());
+            d.insertString(d.getLength(),"OUC----HP_LABORATORY  \n"+date+"\n" ,attr);
+            add(scrollPane2,BorderLayout.CENTER);
             this.fileRead();
         } catch (Exception e) {
             e.printStackTrace();
@@ -105,14 +125,16 @@ public class SwingGUI extends JFrame {
             file = new File(FILEPATH);
             randomAccessFile = new RandomAccessFile(file, "r");
                 while (isModify ) {
-                    Thread.sleep(1000);
+                    Thread.sleep(500);
                     randomAccessFile.seek(pos);
                     string = randomAccessFile.readLine();
                     if (string != null) {
                         string = new String(string.getBytes("ISO-8859-1"), "UTF-8");//将读取出来的GBK格式的代码转换成UTF-8
                         textArea.append(string + "\n");
+                        d.insertString(d.getLength(),string+"\n",attr);
                         textArea.validate();
                         textArea.setCaretPosition(textArea.getText().length());/*将光标移动到最新行，实现自动滚动到最新添加的信息*/
+                        textPane.setCaretPosition(textPane.getStyledDocument().getLength());
                         pos = randomAccessFile.getFilePointer();
                    /* System.out.println("@"+string);
                     System.out.println(pos);*/
@@ -132,9 +154,12 @@ public class SwingGUI extends JFrame {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (BadLocationException e) {
+            e.printStackTrace();
         }
     }
     public static void main (String[]args) throws IOException, InterruptedException {
+        System.out.println(System.getProperty("user.dir"));
         SwingGUI swingGUI = new SwingGUI();
 
         /*  s.fileMoniter();*/
