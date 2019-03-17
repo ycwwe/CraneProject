@@ -2,8 +2,11 @@ package com.example.business;
 
 public interface JobTLCCallBack {
     void parseJobAcceptedReport(long jobId);
+
     void parseJobStartedReport(long jobId, int predictedTime, int partOfJob);
+
     void parseJobDoneReport(long jobId, int regarding, int action, int rejectCode);
+
     void parseWaitingReport(long jobId, int waitType, int latchedWeight);
    /* void parseTransferPosReport(int actBlock,int actRow,int actBay,int actHeight,int blockTransferArea);
 

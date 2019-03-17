@@ -9,70 +9,94 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.*;
 import java.nio.file.*;
 import java.util.Date;
 
 public class SwingGUI extends JFrame {
-    private  static Logger loggerInfo = LogManager.getLogger("demo_info");
-    private  static Logger loggError = LogManager.getLogger("demo_error");
-    private  boolean isModify=true;
-    private static  File file;
-    private static  RandomAccessFile randomAccessFile;
-    private static  final String FILEPATH=System.getProperty("user.dir")+"\\check\\logs\\springboot-log4j2-demo\\demo-info.log";
-    private static  final String DIRPATH=System.getProperty("user.dir")+"\\check\\logs\\springboot-log4j2-demo\\";
-    private static String string=null;
-    private static long pos=0;
+    private static Logger loggerInfo = LogManager.getLogger("demo_info");
+    private static Logger loggError = LogManager.getLogger("demo_error");
+    private boolean isModify = true;
+    private static File file;
+    private static RandomAccessFile randomAccessFile;
+    private static final String FILEPATH = System.getProperty("user.dir") + "\\check\\logs\\springboot-log4j2-demo\\demo-info.log";
+    private static final String DIRPATH = System.getProperty("user.dir") + "\\check\\logs\\springboot-log4j2-demo\\";
+    private static String string = null;
+    private static long pos = 0;
     /*private static  final int TEXTAREA_ROWS=1000;
     private static  final int TEXTAREA_COLUMNS=150;*/
-    private static  JTextArea textArea=new JTextArea(/*TEXTAREA_ROWS,TEXTAREA_COLUMNS*/);
-    private  JTextPane textPane=new JTextPane();
-    StyledDocument d=textPane.getStyledDocument();
-    SimpleAttributeSet attr = new SimpleAttributeSet();
-    private static PrintStream printStream=new PrintStream(System.out){
-        public void println(String string){
+    private static JTextArea textArea = new JTextArea(/*TEXTAREA_ROWS,TEXTAREA_COLUMNS*/);
+    private JTextPane textPane = new JTextPane();
+    private StyledDocument d = textPane.getStyledDocument();
+    private SimpleAttributeSet attr = new SimpleAttributeSet();
+    private Thread thread = Thread.currentThread();
+    private static boolean actionFlag = true;
+    private static PrintStream printStream = new PrintStream(System.out) {
+        @Override
+        public void println(String string) {
             textArea.append(string);
             textArea.validate();
         }
-       /*将System.out.println()的输出投到textarea*/
+        /*将System.out.println()的输出投到textarea*/
     };
-    public SwingGUI(){
+
+    public SwingGUI() {
         start();
     }
-    private void start(){
 
+    private void start() {
         try {
+            thread.setName("SwingUI");
            /* URL imgURL=new URL("imges/icon.png");
             Image imge = ImageIO.read(imgURL);*/
             /*Image imge =getToolkit().getImage("/icon.png");*/
            /* ImageIcon icon=new ImageIcon("C:\\Users\\Administrator\\Pictures\\icon.png");
             setIconImage(icon.getImage());*/
-            setSize(700,800);
+            setSize(700, 800);
             setTitle("XJD显示器");
             setVisible(true);
             setLocationRelativeTo(null);
             setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);/*JFrame.EXIT_ON_CLOSE*/
-            JPanel topJpanel= new JPanel();
+            JPanel topJpanel = new JPanel();
             topJpanel.setBackground(Color.red);
-            JPanel downJpanel= new JPanel();
+            JPanel downJpanel = new JPanel(new FlowLayout());
+            JButton jbStart = new JButton("开始");
+            JButton jbStop = new JButton("暂停");
+            jbStart.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    actionFlag = true;
+                }
+
+            });
+            jbStop.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    actionFlag = false;
+                }
+            });
             downJpanel.setBackground(Color.red);
-            add(topJpanel,BorderLayout.NORTH);
-            add(downJpanel,BorderLayout.SOUTH);
-            textArea.setFont(new Font("显示器",Font.PLAIN,15));
-            textArea.setLineWrap(true);/*关闭横滚动条*/
+            downJpanel.add(jbStart);
+            downJpanel.add(jbStop);
+            add(topJpanel, BorderLayout.NORTH);
+            add(downJpanel, BorderLayout.SOUTH);
+           /* textArea.setFont(new Font("显示器",Font.PLAIN,15));
+            textArea.setLineWrap(true);*//*关闭横滚动条*//*
             textArea.setWrapStyleWord(true);
-            textArea.setBackground(Color.BLACK);
+            textArea.setBackground(Color.BLACK);*/
            /* JScrollPane scrollPane=new JScrollPane(textArea);
             add(scrollPane, BorderLayout.CENTER);*/
-            JScrollPane scrollPane2=new JScrollPane(textPane);
-            textPane.setSize(350,800);
+            JScrollPane scrollPane2 = new JScrollPane(textPane);
+            textPane.setSize(350, 800);
             textPane.setBackground(Color.BLACK);
             StyleConstants.setForeground(attr, Color.white);
-            StyleConstants.setBackground(attr,Color.BLACK);
-            StyleConstants.setFontSize(attr,16);
+            StyleConstants.setBackground(attr, Color.BLACK);
+            StyleConstants.setFontSize(attr, 16);
             String date = String.valueOf(new Date());
-            d.insertString(d.getLength(),"OUC----HP_LABORATORY  \n"+date+"\n" ,attr);
-            add(scrollPane2,BorderLayout.CENTER);
+            d.insertString(d.getLength(), "OUC----HP_LABORATORY  \n" + date + "\n", attr);
+            add(scrollPane2, BorderLayout.CENTER);
             this.fileRead();
         } catch (Exception e) {
             e.printStackTrace();
@@ -88,6 +112,7 @@ public class SwingGUI extends JFrame {
            textArea.validate();
        }*/
     }
+
     /*创建WatchService
       得到待检测目录的Path
       将目录登记到变化监测名单中
@@ -95,56 +120,59 @@ public class SwingGUI extends JFrame {
       得到WatchKey后遍历WatchEvent进行检测
       重置key准备下一个事件，继续等待*/
     private void fileMoniter() throws IOException, InterruptedException {
-      /*  System.setOut(printStream);*/
+        /*  System.setOut(printStream);*/
         System.out.println("正在监控demo-info.log..........\n");
 
-        WatchService watchService= FileSystems.getDefault().newWatchService();
-        final Path path= Paths.get(DIRPATH);
-        final WatchKey watchKey= path.register(watchService,StandardWatchEventKinds.ENTRY_MODIFY,StandardWatchEventKinds.ENTRY_CREATE,StandardWatchEventKinds.ENTRY_DELETE);
-        boolean fileNotChanged=true;
-        while(fileNotChanged){
-            final WatchKey wk=watchService.take();
-            for(WatchEvent event:wk.pollEvents()){
-                final Path changed=(Path)event.context();
-                System.out.println(changed+","+event.kind()+"\n");
-                if(changed.endsWith("demo-info.log")){
+        WatchService watchService = FileSystems.getDefault().newWatchService();
+        final Path path = Paths.get(DIRPATH);
+        final WatchKey watchKey = path.register(watchService, StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_DELETE);
+        boolean fileNotChanged = true;
+        while (fileNotChanged) {
+            final WatchKey wk = watchService.take();
+            for (WatchEvent event : wk.pollEvents()) {
+                final Path changed = (Path) event.context();
+                System.out.println(changed + "," + event.kind() + "\n");
+                if (changed.endsWith("demo-info.log")) {
                     System.out.println("demo-info.log已经被修改了\n");
-                    isModify=true;
+                    isModify = true;
                     fileRead();
                 }
             }
-            boolean valid=wk.reset();
-            if(!valid){
+            boolean valid = wk.reset();
+            if (!valid) {
                 System.out.println("Key has been unregisterede\n");
-                isModify=false;
+                isModify = false;
             }
         }
     }
+
     private void fileRead() {
         try {
             file = new File(FILEPATH);
             randomAccessFile = new RandomAccessFile(file, "r");
-                while (isModify ) {
+            while (isModify) {
+                if (actionFlag) {
                     Thread.sleep(500);
                     randomAccessFile.seek(pos);
                     string = randomAccessFile.readLine();
                     if (string != null) {
                         string = new String(string.getBytes("ISO-8859-1"), "UTF-8");//将读取出来的GBK格式的代码转换成UTF-8
-                        textArea.append(string + "\n");
-                        d.insertString(d.getLength(),string+"\n",attr);
+                        /*textArea.append(string + "\n");
                         textArea.validate();
-                        textArea.setCaretPosition(textArea.getText().length());/*将光标移动到最新行，实现自动滚动到最新添加的信息*/
+                        textArea.setCaretPosition(textArea.getText().length());*//*将光标移动到最新行，实现自动滚动到最新添加的信息*/
+                        d.insertString(d.getLength(), string + "\n", attr);
                         textPane.setCaretPosition(textPane.getStyledDocument().getLength());
                         pos = randomAccessFile.getFilePointer();
                    /* System.out.println("@"+string);
                     System.out.println(pos);*/
                     } else {
                         /*System.out.println("################");*/
-                         fileRead();/*使用轮询的方式监控文件*/
+                        fileRead();/*使用轮询的方式监控文件*/
                         /*this.fileMoniter();*//*使用watchservice的方式监控文件*/
 
                     }
                 }
+            }
 
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -158,7 +186,8 @@ public class SwingGUI extends JFrame {
             e.printStackTrace();
         }
     }
-    public static void main (String[]args) throws IOException, InterruptedException {
+
+    public static void main(String[] args) throws IOException, InterruptedException {
         System.out.println(System.getProperty("user.dir"));
         SwingGUI swingGUI = new SwingGUI();
 

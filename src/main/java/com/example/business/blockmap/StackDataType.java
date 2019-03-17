@@ -1,4 +1,5 @@
 package com.example.business.blockmap;
+
 /*用于分析writeStack()接受的参数*/
 public class StackDataType {
     public static final int STACK_STATUS_OK = 0;
@@ -6,21 +7,23 @@ public class StackDataType {
     private int tier = 0;
     private int status = 0;
     private SlotDataType slots;
+
     /*构造函数，多态*/
     public StackDataType() {
-            this.slots = new SlotDataType("empty", 0, 0, 0, 0);
+        this.slots = new SlotDataType("empty", 0, 0, 0, 0);
     }
 
-    public StackDataType(int _size, int _tier, int _status) {
+    public StackDataType(int size, int tier, int status) {
         this();
-        this.size = _size;
-        this.tier = _tier;
-        this.status = _status;
+        this.size = size;
+        this.tier = tier;
+        this.status = status;
     }
-    public StackDataType(int _size, int _tier, int _status,SlotDataType slots) {
-        this.size = _size;
-        this.tier = _tier;
-        this.status = _status;
+
+    public StackDataType(int size, int tier, int status, SlotDataType slots) {
+        this.size = size;
+        this.tier = tier;
+        this.status = status;
         this.slots = slots;
     }
     /*toString方法*/
@@ -79,9 +82,6 @@ public class StackDataType {
     public void setTier(int tier) {
         this.tier = tier;
     }
-
-
-
 
 
 }

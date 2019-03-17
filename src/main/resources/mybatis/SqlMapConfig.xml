@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE configuration
-PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
-"http://mybatis.org/dtd/mybatis-3-config.dtd">
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
 <configuration>
 
-	<!-- settings -->
-	<settings>
-		<!--&lt;!&ndash; 打开延迟加载的开关 &ndash;&gt;
-		<setting name="lazyLoadingEnabled" value="true"/>-->
-		<!-- 将积极加载改为消极加载（即按需加载） -->
-		<setting name="aggressiveLazyLoading" value="false"/>	
-		<!-- 打开全局缓存开关（二级缓存）默认值就是true -->
-		<setting name="cacheEnabled" value="true"/>
-	</settings>
-	
-	<!-- 别名的定义 -->
-	<typeAliases>
-		<package name="com.example.dao.entity"/>
-	</typeAliases>
-	<!-- 加载映射文件去除了，有了spring的Mapper自动扫描器后，加载文件交给spring来做，且不需要UserMapper.xml文件，取而代之的是cn.com.sm.mapper包里的UserQueryMapper.xml文件 -->
-	<!-- 同时Dao层也可以省去，即cn.com.sm.dao包下的Dao接口和Dao实现都可以省去，来让Spring去做 -->
+    <!-- settings -->
+    <settings>
+        <!--&lt;!&ndash; 打开延迟加载的开关 &ndash;&gt;
+        <setting name="lazyLoadingEnabled" value="true"/>-->
+        <!-- 将积极加载改为消极加载（即按需加载） -->
+        <setting name="aggressiveLazyLoading" value="false"/>
+        <!-- 打开全局缓存开关（二级缓存）默认值就是true -->
+        <setting name="cacheEnabled" value="true"/>
+    </settings>
+
+    <!-- 别名的定义 -->
+    <typeAliases>
+        <package name="com.example.dao.entity"/>
+    </typeAliases>
+    <!-- 加载映射文件去除了，有了spring的Mapper自动扫描器后，加载文件交给spring来做，且不需要UserMapper.xml文件，取而代之的是cn.com.sm.mapper包里的UserQueryMapper.xml文件 -->
+    <!-- 同时Dao层也可以省去，即cn.com.sm.dao包下的Dao接口和Dao实现都可以省去，来让Spring去做 -->
 </configuration>

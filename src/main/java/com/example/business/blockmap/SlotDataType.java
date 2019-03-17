@@ -1,4 +1,5 @@
 package com.example.business.blockmap;
+
 /*用于分析writeStack()接受的参数*/
 public class SlotDataType {
     private String identity;/*集装箱独立ID*/
@@ -40,7 +41,6 @@ public class SlotDataType {
     }
 
 
-
     public String getIdentity() {
         return identity;
     }
@@ -50,24 +50,21 @@ public class SlotDataType {
     }
 
 
-
-    public SlotDataType()
-    {
+    public SlotDataType() {
     }
 
-    public SlotDataType(String _identity, int _type, int _height, int _doorDirection, int _weight)
-    {
-        this.identity = _identity;
-        this.type = _type;
-        this.height = _height;
-        this.doorDirection = _doorDirection;
-        this.weight = _weight;
+    public SlotDataType(String identity, int type, int height, int doorDirection, int weight) {
+        this.identity = identity;
+        this.type = type;
+        this.height = height;
+        this.doorDirection = doorDirection;
+        this.weight = weight;
     }
 
     @Override
     public String toString() {
         return "SlotDataType{" +
-                "identity='" + identity  +
+                "identity='" + identity +
                 ", doorDirection=" + doorDirection +
                 ", weight=" + weight +
                 ", type=" + type +

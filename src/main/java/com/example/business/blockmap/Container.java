@@ -2,61 +2,69 @@
 package com.example.business.blockmap;
 
 import java.io.Serializable;
+
 /*用于分析writeStack()接受的参数*/
 /*集装箱ISO类*/
-public class Container{
+public class Container {
 
-    private static final String RESVERSTION ="1";
+    private static final String RESVERSTION = "1";
     private String contISO;
-    private  String sizeISOCodes = null;
+    private String sizeISOCodes = null;
     private String heightISOCodes = null;
-    private  String typeISOCodes = null;
-    private  int cntrsize = -1;
-    private  int cntrhigh=0;
-    private  int cntrtype=-1;
+    private String typeISOCodes = null;
+    private int cntrsize = -1;
+    private int cntrhigh = 0;
+    private int cntrtype = -1;
+
     /*构造函数实现多态*/
-    public Container(){
+    public Container() {
     }
+
     /*实例化Container并传入箱子ISO编码，将ISO进行转换*/
-    public Container(String cntrType){
+    public Container(String cntrType) {
         this.parseContISo(cntrType);
     }
+
     /*实例化Container并传入箱子的size,higheit,type，转换为ISO*/
-    public Container(int cntrsize,int cntrhigh,int cntrtype){
-        this.toContISO(cntrsize,cntrhigh,cntrtype);
+    public Container(int cntrsize, int cntrhigh, int cntrtype) {
+        this.toContISO(cntrsize, cntrhigh, cntrtype);
         this.setContISO();
     }
-    public static void main(String[] args){
+
+    public static void main(String[] args) {
         /*Container c=new Container("22G1");
         System.out.println("h"+c.getCntrhigh());
         System.out.println("s"+c.getCntrsize());
         System.out.println("t"+c.getCntrtype());*/
-        Container c=new Container(1,1,1);
+        Container c = new Container(1, 1, 1);
         System.out.println(c.getContISO());
     }
+
     public String getContISO() {
         return contISO;
     }
 
     private void setContISO() {
-        this.contISO = sizeISOCodes+heightISOCodes+typeISOCodes+RESVERSTION;
+        this.contISO = sizeISOCodes + heightISOCodes + typeISOCodes + RESVERSTION;
     }
-    public  int getCntrsize() {
+
+    public int getCntrsize() {
         return cntrsize;
     }
 
-    public  int getCntrhigh() {
+    public int getCntrhigh() {
         return cntrhigh;
     }
 
-    public  int getCntrtype() {
+    public int getCntrtype() {
         return cntrtype;
     }
-/*解析ISO*/
+
+    /*解析ISO*/
     private void parseContISo(String cntrISO) {
         char size = cntrISO.charAt(0);
         char high = cntrISO.charAt(1);
-        char type =cntrISO.charAt(2);
+        char type = cntrISO.charAt(2);
         switch (size) {
             case '2':
                 cntrsize = 1;
@@ -94,8 +102,9 @@ public class Container{
                 break;
         }
     }
+
     /*转化为ISO*/
-    private void toContISO(int cntrsize,int cntrhigh,int cntrtype){
+    private void toContISO(int cntrsize, int cntrhigh, int cntrtype) {
         switch (cntrsize) {
             case 1:
                 sizeISOCodes = "2";
@@ -117,19 +126,19 @@ public class Container{
         }
         switch (cntrtype) {
             case 1:
-                typeISOCodes  ="G";
+                typeISOCodes = "G";
                 break;
             case 2:
-                typeISOCodes  = "U";
+                typeISOCodes = "U";
                 break;
             case 3:
-                typeISOCodes  = "T";
+                typeISOCodes = "T";
                 break;
             case 4:
-                typeISOCodes  = "P";
+                typeISOCodes = "P";
                 break;
             case 5:
-                typeISOCodes  = "R";
+                typeISOCodes = "R";
                 break;
         }
     }

@@ -1,18 +1,11 @@
 package com.example.business;
 
-import com.example.communication.ComLink;
-import com.example.communication.ComLink2;
-import com.example.communication.Message;
+import com.example.communication.mina.ClientCconnect;
 import com.example.quartz.job.filter.InfoMaintenanceClass;
 import com.example.quartz.job.sender.MessageForm;
-import com.example.util.SpringUtil;
-import org.apache.logging.log4j.LogManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,57 +18,60 @@ public abstract class BaseClass {
     @Qualifier("comLinkTwo")
     private ComLink comLinkTwo;*/
 
-
+    private ClientCconnect clientCconnect=ClientCconnect.getClientCconnectInstance();
     private static org.slf4j.Logger loggerInfo = LoggerFactory.getLogger("demo_info");
-    private  static Logger loggError = LoggerFactory.getLogger("demo_error");
-    private static final String JOBTLC="com.example.business.JobTLC";
-    private static final String BLOCKMAPTLC="com.example.business.BlockMapTLC";
-    private  Map<String,String> addressAndIdMap= InfoMaintenanceClass.addressAndIdMap;/*记录xcc的ip：port（value） 和 ID(key)*/
-    private  Map<String,Integer> addressAndSuffixMap=InfoMaintenanceClass.addressAndSuffixMap;/*记录注册到IOC容器中的comlink对象的IP地址+端口号(key) 和 注册到容器的comlink的后缀（value）*/
+    private static Logger loggError = LoggerFactory.getLogger("demo_error");
+    private static final String JOBTLC = "com.example.business.JobTLC";
+    private static final String BLOCKMAPTLC = "com.example.business.BlockMapTLC";
+    private Map<String, String> addressAndIdMap = InfoMaintenanceClass.addressAndIdMap;/*记录xcc的ip：port（value） 和 ID(key)*/
+    private Map<String, Integer> addressAndSuffixMap = InfoMaintenanceClass.addressAndSuffixMap;/*记录注册到IOC容器中的comlink对象的IP地址+端口号(key) 和 注册到容器的comlink的后缀（value）*/
+
     protected void ack(MessageForm messageForm) {
-      /*  获取调用者的类名*/
+        /*  获取调用者的类名*/
       /*  String className= new Throwable().getStackTrace()[1].getClassName();
         Map<String,String> param =new HashMap<String,String>(){{
         }};*/
-        Map<String,String> param =new HashMap<String,String>(){{
+        Map<String, String> param = new HashMap<String, String>() {{
         }};
         String reciver = messageForm.getSender();
-        MessageForm reply=new MessageForm(messageForm.getInstanceNum(),2,2,2,messageForm.getSequenceNum(),"XJD",reciver,param);
-        loggerInfo.info("XJD已经接收到XCC回复到的消息，即将发送确认消息给:"+reciver);
-        if(addressAndIdMap.containsKey(reciver)){
-            String address=addressAndIdMap.get(reciver);
-            int suffix=addressAndSuffixMap.get(address);
-            ComLink2 comLink= (ComLink2) SpringUtil.getBean("comLink"+String.valueOf(suffix));/*获取xccId对应的并注册到IOC容器中的comLink对象*/
-            boolean isSuccess=false;
-            if(comLink!=null){
-                if( comLink.send(new Message(reply.toString()))){
-                    isSuccess=true;
-                    loggerInfo.info("成功发送确认消息给XccID:"+reciver);
-                }else{
-                    loggerInfo.info("发送确认失败:xccid:"+reciver+"即将重新发送确认消息："+messageForm.toString());
-                    isSuccess=false;
-                    while(!isSuccess){
-                        loggerInfo.info("正在重新发送确认消息："+messageForm.toString());
+        MessageForm reply = new MessageForm(messageForm.getInstanceNum(), 2, 2, 2, messageForm.getSequenceNum(), "XJD", reciver, param);
+        loggerInfo.info("XJD已经接收到XCC回复到的消息，即将发送确认消息给:" + reciver);
+        if (addressAndIdMap.containsKey(reciver)) {
+           /* String address = addressAndIdMap.get(reciver);
+            int suffix = addressAndSuffixMap.get(address);
+            ComLink2 comLink = (ComLink2) SpringUtil.getBean("comLink" + String.valueOf(suffix));*//*获取xccId对应的并注册到IOC容器中的comLink对象*//*
+            boolean isSuccess = false;
+            if (comLink != null) {
+                if (comLink.send(new Message(reply.toString()))) {*/
+            boolean isSuccess = true;
+            if ( null!=clientCconnect) {
+                if (clientCconnect.send(reciver,reply)) {
+                    loggerInfo.info("成功发送确认消息给XccID:" + reciver);
+                } else {
+                    loggerInfo.info("发送确认失败:xccid:" + reciver + "即将重新发送确认消息：" + messageForm.toString());
+                    isSuccess = false;
+                    while (!isSuccess) {
+                        loggerInfo.info("正在重新发送确认消息：" + messageForm.toString());
                         try {
                             Thread.sleep(2000);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
-                        if(comLink.send(new Message(reply.toString()))){
-                          isSuccess=true;
-                            loggerInfo.info("重新发送发送确认消息成功，该条作业指令为："+messageForm.toString());
-                        }else{
-                            loggerInfo.info("重新发送确认消息失败，该条作业指令为："+messageForm.toString());
-                           isSuccess=false;
+                        if (clientCconnect.send(reciver,reply)) {
+                            isSuccess = true;
+                            loggerInfo.info("重新发送发送确认消息成功，该条作业指令为：" + messageForm.toString());
+                        } else {
+                            loggerInfo.info("重新发送确认消息失败，该条作业指令为：" + messageForm.toString());
+                            isSuccess = false;
                         }
                     }
                 }
-            }else{
-                loggError.error("XCC未连接,id:"+reciver);
+            } else {
+                loggError.error("XCC未连接,id:" + reciver);
             }
 
-        }else{
-            loggerInfo.info("该XccID未注册："+reciver);
+        } else {
+            loggerInfo.info("该XccID未注册：" + reciver);
         }
        /* switch(reciver){
             case"XCC_ONE":
@@ -90,13 +86,15 @@ public abstract class BaseClass {
 
 
     }
+
     protected void ack() {
         /*获取调用者的类名*/
-        String className= new Throwable().getStackTrace()[1].getClassName();
-        System.out.println("ack()被"+className+"调用");
+        String className = new Throwable().getStackTrace()[1].getClassName();
+        System.out.println("ack()被" + className + "调用");
     }
-   /*  protected void ack(MessageForm messageForm) {
-    *//* 获取调用者的类名*//*
+
+    /*  protected void ack(MessageForm messageForm) {
+     *//* 获取调用者的类名*//*
         String className= new Throwable().getStackTrace()[1].getClassName();
         Map<String,String> param =new HashMap<String,String>(){{
         }};
@@ -111,35 +109,36 @@ public abstract class BaseClass {
                 break; }*//*
 
     }*/
-    protected  int ack(int i,String str) {
+    protected int ack(int i, String str) {
         /*System.out.println("ack()被调用");*/
         return i;
     }
+
     public void messageReceived(MessageForm msg) {
 
-            switch(msg.getMethodNum()) {
-                case 1:
-                    this.parseNak(msg);
-                    break;
-                case 2:
-                    this.parseAck(msg);
-                    break;
-                case 3:
-                    this.parseDataPartNak(msg);
-                    break;
-                case 4:
-                    this.parseBufferNak(msg);
-                    break;
-                case 5:
-                    this.parseMethodBusyNak(msg);
-                    break;
-                case 6:
-                    this.parseLogicalNak(msg);
-                    break;
-                default:
-                    loggError.error("XCC传入的methodId错误，无法识别!jobId:"+msg.getMethodNum());
-                    break;
-             }
+        switch (msg.getMethodNum()) {
+            case 1:
+                this.parseNak(msg);
+                break;
+            case 2:
+                this.parseAck(msg);
+                break;
+            case 3:
+                this.parseDataPartNak(msg);
+                break;
+            case 4:
+                this.parseBufferNak(msg);
+                break;
+            case 5:
+                this.parseMethodBusyNak(msg);
+                break;
+            case 6:
+                this.parseLogicalNak(msg);
+                break;
+            default:
+                loggError.error("XCC传入的methodId错误，无法识别!jobId:" + msg.getMethodNum());
+                break;
+        }
     }
 
     private void parseLogicalNak(MessageForm msg) {
@@ -153,13 +152,13 @@ public abstract class BaseClass {
 
     private void parseAck(MessageForm msg) {
         /*获取调用者的类名*/
-        String className= new Throwable().getStackTrace()[1].getClassName();
-        switch (className){
+        String className = new Throwable().getStackTrace()[1].getClassName();
+        switch (className) {
             case JOBTLC:
-                loggerInfo.info("XJD的方法"+className+":已经接收到ACK()"+msg);
+                loggerInfo.info("XJD的方法" + className + ":已经接收到ACK()" + msg);
                 break;
-            case  BLOCKMAPTLC:
-                loggerInfo.info("XJD的方法"+className+":已经接收到ACK()"+msg);
+            case BLOCKMAPTLC:
+                loggerInfo.info("XJD的方法" + className + ":已经接收到ACK()" + msg);
                 break;
         }
     }
@@ -171,26 +170,26 @@ public abstract class BaseClass {
     private void parseNak(MessageForm msg) {
     }
 
-    protected  void nak() {
+    protected void nak() {
 
     }
 
 
-    protected  void dataPartNak() {
+    protected void dataPartNak() {
 
     }
 
 
-    protected  void bufferNak() {
+    protected void bufferNak() {
 
     }
 
 
-    protected  void methodBusyNak() {
+    protected void methodBusyNak() {
 
     }
 
-    protected  void logicalNak() {
+    protected void logicalNak() {
 
     }
 }

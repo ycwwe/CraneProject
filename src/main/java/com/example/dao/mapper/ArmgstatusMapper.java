@@ -2,7 +2,9 @@ package com.example.dao.mapper;
 
 import com.example.dao.entity.Armgstatus;
 import com.example.dao.entity.ArmgstatusExample;
+
 import java.util.List;
+
 import org.apache.ibatis.annotations.Param;
 
 public interface ArmgstatusMapper {

@@ -143,7 +143,7 @@ import java.util.Objects;
 
     public MessageForm() {
     }
-}*/ public class MessageForm implements Serializable{
+}*/ public class MessageForm implements Serializable {
     private int instanceNum;
     private int classNum;
     private int methodNum;
@@ -168,8 +168,6 @@ import java.util.Objects;
     public void setReciver(String reciver) {
         this.reciver = reciver;
     }
-
-
 
 
     public int getInstanceNum() {
@@ -243,11 +241,11 @@ import java.util.Objects;
     public MessageForm(int instanceNum,
                        int classNum,
                        int methodNum, Map parameter
-            ) {
-        this.classNum=classNum;
-        this.instanceNum=instanceNum;
-        this.parameters=parameter;
-        this.methodNum=methodNum;
+    ) {
+        this.classNum = classNum;
+        this.instanceNum = instanceNum;
+        this.parameters = parameter;
+        this.methodNum = methodNum;
     }
 
     @Override
@@ -270,16 +268,16 @@ import java.util.Objects;
                        int replyFlag,
                        int sequenceNum,
                        String sender,
-                       String reciver,Map parameter
+                       String reciver, Map parameter
     ) {
-        this.classNum=classNum;
-        this.instanceNum=instanceNum;
-        this.parameters=parameter;
-        this.replyFlag=replyFlag;
-        this.sequenceNum=sequenceNum;
-        this.reciver=reciver;
-        this.sender=sender;
-        this.methodNum=methodNum;
+        this.classNum = classNum;
+        this.instanceNum = instanceNum;
+        this.parameters = parameter;
+        this.replyFlag = replyFlag;
+        this.sequenceNum = sequenceNum;
+        this.reciver = reciver;
+        this.sender = sender;
+        this.methodNum = methodNum;
     }
 
     public MessageForm() {

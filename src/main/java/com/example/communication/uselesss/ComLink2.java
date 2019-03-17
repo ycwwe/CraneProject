@@ -1,4 +1,5 @@
-package com.example.communication;
+package com.example.communication.uselesss;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -16,23 +17,24 @@ import java.util.Map;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 
-import com.alibaba.fastjson.JSON;
-import com.example.quartz.job.listener.XccListener2;
+import com.example.communication.mina.Message;
+import com.example.quartz.job.listener.XCCListener3;
 import com.example.quartz.job.sender.MessageForm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 
 
-public class ComLink2 implements ComlinkInterface, InitializingBean {
-    private static final Logger LOG = LoggerFactory.getLogger(ComLink.class);
+public class ComLink2 implements InitializingBean {
+    private static final Logger LOG = LoggerFactory.getLogger(ComLink2.class);
 
     private String address;
     private int port;
-    private  String clientAddress;
-    private  int clientPort;
+    private String clientAddress;
+    private int clientPort;
     private boolean server = true;
-    private Map<Integer, ComLink> instances = new HashMap();
+
     private String sender;
     private String receiver;
     private volatile Thread readThread;
@@ -65,27 +67,14 @@ public class ComLink2 implements ComlinkInterface, InitializingBean {
         this.clientAddress = clientAddress;
     }
 
-    public  void setClientPort(int clientPort) {
+    public void setClientPort(int clientPort) {
         this.clientPort = clientPort;
     }
 
     public ComLink2() {
     }
 
-    public ComLink2(String clientAddress, int clientPort) {
-        this.clientAddress = clientAddress;
-        this.clientPort = clientPort;
 
-        this.connectThread = new Thread(new Runnable() {
-            public void run() {
-                ComLink2.this.doConnectThreadWork();
-            }
-        });
-        int intCurrentPriority = this.connectThread.getPriority();
-        this.connectThread.setPriority(intCurrentPriority + 1);
-        this.connectThread.setName("connect-" + this);
-        this.connectThread.start();
-    }
     protected void doConnectThreadWork() {
         LOG.info("ComLink[{}]: connect thread started.", this);
         this.state = ComLinkState.WaitingOnServer;
@@ -106,34 +95,44 @@ public class ComLink2 implements ComlinkInterface, InitializingBean {
 
 
     }
+
     private BlockingDeque<Message> getSendQueue() {
         return sendQueue;
     }
+
     private Socket getNewSocket() {
         return newSocket;
     }
+
     private boolean setNewSocket(Socket newSocket) {
         this.newSocket = newSocket;
         return true;
     }
+
     public String getAddress() {
         return address;
     }
+
     public void setAddress(String address) {
         this.address = address;
     }
+
     public int getPort() {
         return port;
     }
+
     public void setPort(int port) {
         this.port = port;
     }
+
     private boolean isServer() {
         return server;
     }
+
     private void setServer(boolean server) {
         this.server = server;
     }
+
     private void setState(ComLinkState newState) {
         if (newState != this.state) {
             this.state = newState;
@@ -142,24 +141,30 @@ public class ComLink2 implements ComlinkInterface, InitializingBean {
                 System.out.println("clearAllMessageTraces()");
             }
 
-            System.out.println("StateChanged��"+newState);
+            System.out.println("StateChanged��" + newState);
         }
     }
+
     private String getSender() {
         return sender;
     }
+
     private void setSender(String sender) {
         this.sender = sender;
     }
+
     private String getReceiver() {
         return receiver;
     }
+
     private void setReceiver(String receiver) {
         this.receiver = receiver;
     }
+
     public ServerManager getServerManager() {
         return serverManager;
     }
+
     public void setServerManager(ServerManager serverManager) {
         this.serverManager = serverManager;
     }
@@ -172,9 +177,11 @@ public class ComLink2 implements ComlinkInterface, InitializingBean {
             e.printStackTrace();
         }
     }
+
     private void clientConnect() {
 
     }
+
     private boolean connectAsServer() throws IOException {
         setState(ComLinkState.WaitingOnClient);
 
@@ -217,13 +224,13 @@ public class ComLink2 implements ComlinkInterface, InitializingBean {
                     return false;
                 }
             }
-        }
-        finally {
+        } finally {
             this.serverManager.stopSubscribeSocket(address, port);//TODO
         }
 
         return false;
     }
+
     public boolean send(Message message) {
         if (this.state == ComLinkState.Connected) {
             this.sendQueue.addLast(message);
@@ -234,8 +241,10 @@ public class ComLink2 implements ComlinkInterface, InitializingBean {
         /*LOG.debug("ComLink[{}]: message not sent.: {} method: {}  Link is down ", new Object[] { this, Integer.valueOf(message.getClassNo()), Integer.valueOf(message.getMethodNo()) });*/
         return false;
     }
+
     public void startReadThread() {
         this.readThread = new Thread(new Runnable() {
+            @Override
             public void run() {
                 ComLink2.this.doReadThreadWork();
             }
@@ -245,10 +254,12 @@ public class ComLink2 implements ComlinkInterface, InitializingBean {
         this.readThread.setName("read-" + this);
         this.readThread.start();
     }
+
     public void startWriteThread() {
         this.writeStopRequested = false;
 
         this.writeThread = new Thread(new Runnable() {
+            @Override
             public void run() {
                 ComLink2.this.doWriteThreadWork();
             }
@@ -258,6 +269,10 @@ public class ComLink2 implements ComlinkInterface, InitializingBean {
         this.writeThread.setName("write-" + this);
         this.writeThread.start();
     }
+
+    @Autowired
+    private XCCListener3 xccListener3;
+
     private void doReadThreadWork() {
         LOG.debug("ComLink[{}]: read thread started.", this);
 //	    if (!connect())
@@ -265,12 +280,12 @@ public class ComLink2 implements ComlinkInterface, InitializingBean {
 //	      LOG.debug("ComLink[{}]: read thread stopped.", this);
 //	      return;
 //	    }
-
+        xccListener3.start();
         while (!this.isStopRequested) {
             try {
                 MessageForm msg = readMessage();
-                XccListener2.setMsgflist(msg);
-               /* reciQueue.addLast(msg);*/
+                XCCListener3.setMsgflist(msg);
+                /* reciQueue.addLast(msg);*/
 //				if (!this.isStopRequested) {
 //					LOG.warn("ComLink[{}]: broken. Trying to reconnect...", this);
 //			        disconnect();
@@ -281,22 +296,30 @@ public class ComLink2 implements ComlinkInterface, InitializingBean {
 //					}
 //				}
             } catch (Exception e) {
-                this.isStopRequested=true;
+                this.isStopRequested = true;
                 LOG.error("ComLink[{}]: Error reading message", e);
             }
 
         }
     }
+
+
+    public boolean send(String id, Message message) {
+        return false;
+    }
+
+
     public MessageForm getMessage() {
         MessageForm msgToRec = null;
         try {
-            msgToRec =  reciQueue.takeFirst();
+            msgToRec = reciQueue.takeFirst();
         } catch (InterruptedException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
         return msgToRec;
     }
+
     private void disconnect() {
         this.disconnecting = true;
         if (this.state == ComLinkState.WaitingOnClient) {
@@ -306,9 +329,9 @@ public class ComLink2 implements ComlinkInterface, InitializingBean {
             Socket socketToClose = this.socket;
             if (socketToClose != null) {
                 if (this.server) {
-                    LOG.debug("ComLink[{}]: closing socket (server) {}:{}", new Object[] { this, socketToClose.getInetAddress(), Integer.valueOf(socketToClose.getLocalPort()) });
-                }else {
-                    LOG.debug("ComLink[{}]: closing socket (client) {}:{}", new Object[] { this, socketToClose.getInetAddress(), Integer.valueOf(socketToClose.getPort()) });
+                    LOG.debug("ComLink[{}]: closing socket (server) {}:{}", new Object[]{this, socketToClose.getInetAddress(), Integer.valueOf(socketToClose.getLocalPort())});
+                } else {
+                    LOG.debug("ComLink[{}]: closing socket (client) {}:{}", new Object[]{this, socketToClose.getInetAddress(), Integer.valueOf(socketToClose.getPort())});
                 }
                 try {
                     setState(ComLinkState.Disconnected);
@@ -319,7 +342,7 @@ public class ComLink2 implements ComlinkInterface, InitializingBean {
                 } catch (IOException ex) {
                     Thread threadToInterrupt;
                     LOG.debug("ComLink[{}]: unexcepted exception in disconnect method", this, ex);
-                }finally {
+                } finally {
                     Thread threadToInterrupt = this.writeThread;
                     if (threadToInterrupt != null) {
                         this.writeStopRequested = true;
@@ -336,24 +359,24 @@ public class ComLink2 implements ComlinkInterface, InitializingBean {
         }
 
     }
+
     private MessageForm readMessage() throws IOException {
 //		byte[] msgBytes = new byte[1024];
 //		int length = this.in.read(msgBytes);
         BufferedReader br = new BufferedReader(new InputStreamReader(in));
-        String  str= br.readLine();
+        String str = br.readLine();
         Message msg = new Message(str);
-        MessageForm msgf=Message.stringToMessage(str);
+        MessageForm msgf = Message.stringToMessage(str);
 
         return msgf;
     }
+
     private void doWriteThreadWork() {
         LOG.debug("ComLink[{}]: write thread started.", this);
         Message msgToSend = null;
         try {
-            while((!this.isStopRequested) && (!this.writeStopRequested)) {
-                msgToSend = (Message)this.sendQueue.takeFirst();
-                msgToSend.setSender(this.sender);
-                msgToSend.setReceiver(this.receiver);
+            while ((!this.isStopRequested) && (!this.writeStopRequested)) {
+                msgToSend = (Message) this.sendQueue.takeFirst();
 		        /*
 		        if (msgToSend.getReplyFlag() != Message.getReplyFlagIsReply())
 		        {
@@ -377,7 +400,7 @@ public class ComLink2 implements ComlinkInterface, InitializingBean {
 		        msgToSend.setCurrentDateAndTime();
 		        */
                 BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out));
-                bw.write(msgToSend.getString()+"\n");
+                bw.write(msgToSend.getString() + "\n");
                 bw.flush();
 //		        byte[] msgBytes = msgToSend.getBytes();
 //		        System.out.println("doWriteThreadWork"+msgBytes);
@@ -388,41 +411,37 @@ public class ComLink2 implements ComlinkInterface, InitializingBean {
         } catch (SocketException ex) {
             List<Message> clearedMessages;
             LOG.debug("ComLink[{}]: unexcepted SocketException in write thread", this, ex);
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             List<Message> clearedMessages;
-            if ((!this.disconnecting) && (!this.writeStopRequested))
-            {
+            if ((!this.disconnecting) && (!this.writeStopRequested)) {
                 LOG.warn("ComLink[{}]: unexcepted exception in write thread", this, ex);
-            }
-            else
-            {
+            } else {
                 LOG.debug("ComLink[{}]: unexcepted exception in write thread 2", this, ex);
             }
-        }
-        finally {
+        } finally {
             this.writeStopRequested = false;
 
             List<Message> clearedMessages = new ArrayList();
             this.sendQueue.drainTo(clearedMessages);
-            if (clearedMessages.size() > 0)
-            {
+            if (clearedMessages.size() > 0) {
                 LOG.info("ComLink[{}]: write thread died with {} unsent messages in queue. Count includes any ping()/pong() messages.", this, Integer.valueOf(clearedMessages.size()));
             }
             try {
                 this.out.close();
-            } catch (IOException ex) { LOG.debug("AALP ComLink[{}]: unexcepted exception in write thread 3", this, ex);
+            } catch (IOException ex) {
+                LOG.debug("AALP ComLink[{}]: unexcepted exception in write thread 3", this, ex);
             }
             LOG.debug("ComLink[{}]: write thread stopped.", this);
         }
     }
+
     private boolean connect() {
         this.isStopRequested = false;
 
         String lastErrorMessage = null;
         boolean connected = false;
 
-        while((!connected) && (!this.isStopRequested)) {
+        while ((!connected) && (!this.isStopRequested)) {
             try {
                 this.disconnecting = false;
 
@@ -438,7 +457,7 @@ public class ComLink2 implements ComlinkInterface, InitializingBean {
                             (!lastErrorMessage.equals(ex.getMessage())))) {
                         LOG.warn("ComLink[{}]: unable to connect due to '{}'. Will retry periodically. ", this, ex.getMessage());
                         lastErrorMessage = ex.getMessage();
-                    }else {
+                    } else {
                         LOG.debug("ComLink[{}]: unable to connect due to '{}'. Will retry periodically. ", this, ex.getMessage());
                     }
                 }
@@ -446,14 +465,10 @@ public class ComLink2 implements ComlinkInterface, InitializingBean {
         }
 
         if ((!connected) && (!this.isStopRequested) && (!this.disconnecting)) {
-            try
-            {
+            try {
                 Thread.sleep(10000L);
-            }
-            catch (InterruptedException ex2)
-            {
-                if (this.isStopRequested)
-                {
+            } catch (InterruptedException ex2) {
+                if (this.isStopRequested) {
                     return false;
                 }
             }
@@ -461,6 +476,7 @@ public class ComLink2 implements ComlinkInterface, InitializingBean {
 
         return connected;
     }
+
     public void stop() {
         this.isStopRequested = true;
         disconnect();
@@ -471,6 +487,7 @@ public class ComLink2 implements ComlinkInterface, InitializingBean {
     public void afterPropertiesSet() throws Exception {
         System.out.println("afterPropertiesSet方法被调用");
         this.connectThread = new Thread(new Runnable() {
+            @Override
             public void run() {
                 ComLink2.this.doConnectThreadWork();
             }

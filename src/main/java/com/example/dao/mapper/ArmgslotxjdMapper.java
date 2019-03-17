@@ -3,7 +3,9 @@ package com.example.dao.mapper;
 import com.example.dao.entity.Armgslotxjd;
 import com.example.dao.entity.ArmgslotxjdExample;
 import com.example.dao.entity.ArmgslotxjdKey;
+
 import java.util.List;
+
 import org.apache.ibatis.annotations.Param;
 
 public interface ArmgslotxjdMapper {

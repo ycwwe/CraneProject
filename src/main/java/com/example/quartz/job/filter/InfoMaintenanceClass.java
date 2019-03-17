@@ -7,21 +7,25 @@ import java.util.*;
 @Component
 public class InfoMaintenanceClass {
 
-    public static Map<String,String> addressAndIdMap=new HashMap<>();/*记录xcc的ip：port（value） 和 ID(key)*/
-    public static Map<String,Integer> addressAndSuffixMap=new HashMap<>();/*记录注册到IOC容器中的comlink对象的IP地址+端口号(key) 和 注册到容器的comlink的后缀（value）*/
 
-    private static final List<Integer> INSTANCEIDLIST ;
+    public static Map<String, String> addressAndIdMap = new HashMap<>();/*记录xcc的ip：port（value） 和 ID(key)*/
+    public static Map<String, Integer> addressAndSuffixMap = new HashMap<>();/*记录注册到IOC容器中的comlink对象的IP地址+端口号(key) 和 注册到容器的comlink的后缀（value）*/
+
+    private static final List<Integer> INSTANCEIDLIST;
+
     static {
-        INSTANCEIDLIST=new ArrayList<>();
+        INSTANCEIDLIST = new ArrayList<>();
         INSTANCEIDLIST.add(1);
         INSTANCEIDLIST.add(2);
         INSTANCEIDLIST.add(3);
         INSTANCEIDLIST.add(4);
         INSTANCEIDLIST.add(5);
     }
-    private static final  List<Integer> CLASSIDLIST;
+
+    private static final List<Integer> CLASSIDLIST;
+
     static {
-        CLASSIDLIST=new ArrayList<>();
+        CLASSIDLIST = new ArrayList<>();
         CLASSIDLIST.add(1);
         CLASSIDLIST.add(2);
         CLASSIDLIST.add(3);
@@ -39,9 +43,11 @@ public class InfoMaintenanceClass {
         CLASSIDLIST.add(201);
 
     }
-    private static final  List <Integer> JOB_TLCMETOHDIDLIST;
+
+    private static final List<Integer> JOB_TLCMETOHDIDLIST;
+
     static {
-        JOB_TLCMETOHDIDLIST=new ArrayList<>();
+        JOB_TLCMETOHDIDLIST = new ArrayList<>();
         JOB_TLCMETOHDIDLIST.add(1);
         JOB_TLCMETOHDIDLIST.add(2);
         JOB_TLCMETOHDIDLIST.add(3);
@@ -63,33 +69,37 @@ public class InfoMaintenanceClass {
         return BLOCKMAP_TLCMETOHDIDLIST;
     }
 
-    private static final List<Integer> BLOCKMAP_TLCMETOHDIDLIST ;
+    private static final List<Integer> BLOCKMAP_TLCMETOHDIDLIST;
+
     static {
-        BLOCKMAP_TLCMETOHDIDLIST=new ArrayList<>();
+        BLOCKMAP_TLCMETOHDIDLIST = new ArrayList<>();
         BLOCKMAP_TLCMETOHDIDLIST.add(1);
         BLOCKMAP_TLCMETOHDIDLIST.add(2);
         BLOCKMAP_TLCMETOHDIDLIST.add(3);
         BLOCKMAP_TLCMETOHDIDLIST.add(4);
         BLOCKMAP_TLCMETOHDIDLIST.add(5);
     }
-    private static final Map<Integer,String>  INSTANCEIDMAP;
-    private static final Map<Integer,String>  CLASSIDMAP;
+
+    private static final Map<Integer, String> INSTANCEIDMAP;
+    private static final Map<Integer, String> CLASSIDMAP;
+
     static {
-        INSTANCEIDMAP=new HashMap<Integer, String>();
-        INSTANCEIDMAP.put(XJDInstanceEnum.HEADERCONFIRM.getClassId(),XJDInstanceEnum.HEADERCONFIRM.getClassName());
-        INSTANCEIDMAP.put(XJDInstanceEnum.SYSTEM.getClassId(),XJDInstanceEnum.SYSTEM.getClassName());
-        INSTANCEIDMAP.put(XJDInstanceEnum.BLOCKMAP_TLC.getClassId(),XJDInstanceEnum.BLOCKMAP_TLC.getClassName());
-        INSTANCEIDMAP.put(XJDInstanceEnum.CRANE_TLC.getClassId(),XJDInstanceEnum.CRANE_TLC.getClassName());
-        INSTANCEIDMAP.put(XJDInstanceEnum.JOB_TLC.getClassId(),XJDInstanceEnum.JOB_TLC.getClassName());
+        INSTANCEIDMAP = new HashMap<Integer, String>();
+        INSTANCEIDMAP.put(XJDInstanceEnum.HEADERCONFIRM.getClassId(), XJDInstanceEnum.HEADERCONFIRM.getClassName());
+        INSTANCEIDMAP.put(XJDInstanceEnum.SYSTEM.getClassId(), XJDInstanceEnum.SYSTEM.getClassName());
+        INSTANCEIDMAP.put(XJDInstanceEnum.BLOCKMAP_TLC.getClassId(), XJDInstanceEnum.BLOCKMAP_TLC.getClassName());
+        INSTANCEIDMAP.put(XJDInstanceEnum.CRANE_TLC.getClassId(), XJDInstanceEnum.CRANE_TLC.getClassName());
+        INSTANCEIDMAP.put(XJDInstanceEnum.JOB_TLC.getClassId(), XJDInstanceEnum.JOB_TLC.getClassName());
     }
+
     static {
-        CLASSIDMAP=new HashMap<Integer, String>();
-        CLASSIDMAP.put(XJDClassEnum.HEADERCONFIRM.getClassId(),XJDClassEnum.HEADERCONFIRM.getClassName());
-        CLASSIDMAP.put(XJDClassEnum.BASE_CLASS.getClassId(),XJDClassEnum.BASE_CLASS.getClassName());
-        CLASSIDMAP.put(XJDClassEnum.SYSTEM.getClassId(),XJDClassEnum.SYSTEM.getClassName());
-        CLASSIDMAP.put(XJDClassEnum.JOB_TLC.getClassId(),XJDClassEnum.JOB_TLC.getClassName());
-        CLASSIDMAP.put(XJDClassEnum.CRANE_TLC.getClassId(),XJDClassEnum.CRANE_TLC.getClassName());
-        CLASSIDMAP.put(XJDClassEnum.BLOCKMAP_TLC.getClassId(),XJDClassEnum.BLOCKMAP_TLC.getClassName());
+        CLASSIDMAP = new HashMap<Integer, String>();
+        CLASSIDMAP.put(XJDClassEnum.HEADERCONFIRM.getClassId(), XJDClassEnum.HEADERCONFIRM.getClassName());
+        CLASSIDMAP.put(XJDClassEnum.BASE_CLASS.getClassId(), XJDClassEnum.BASE_CLASS.getClassName());
+        CLASSIDMAP.put(XJDClassEnum.SYSTEM.getClassId(), XJDClassEnum.SYSTEM.getClassName());
+        CLASSIDMAP.put(XJDClassEnum.JOB_TLC.getClassId(), XJDClassEnum.JOB_TLC.getClassName());
+        CLASSIDMAP.put(XJDClassEnum.CRANE_TLC.getClassId(), XJDClassEnum.CRANE_TLC.getClassName());
+        CLASSIDMAP.put(XJDClassEnum.BLOCKMAP_TLC.getClassId(), XJDClassEnum.BLOCKMAP_TLC.getClassName());
 
     }
 
@@ -113,7 +123,7 @@ public class InfoMaintenanceClass {
         return CLASSIDMAP;
     }
 
-    public static void main(String[] args){
+    public static void main(String[] args) {
         System.out.println(INSTANCEIDLIST.contains(1));
 
     }

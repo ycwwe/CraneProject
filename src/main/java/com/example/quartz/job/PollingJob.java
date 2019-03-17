@@ -1,4 +1,5 @@
 package com.example.quartz.job;
+
 import com.example.quartz.job.poller.PollingDB;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.DisallowConcurrentExecution;
@@ -15,7 +16,7 @@ public class PollingJob implements Job {
     @Autowired
     private PollingDB pollingDB;
 
-    public void run() throws InterruptedException {
+    private void run() throws InterruptedException {
         pollingDB.startPollingDB();
     }
 

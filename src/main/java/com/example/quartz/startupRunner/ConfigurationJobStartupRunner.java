@@ -1,13 +1,12 @@
 package com.example.quartz.startupRunner;
 
-import com.example.communication.ComLink;
-import com.example.communication.ServerManager;
+
+import com.example.communication.mina.ClientCconnect;
 import com.example.quartz.jobDispatcher.QuartzJob;
 import com.example.quartz.jobDispatcher.QuartzManage;
 import com.example.util.IpAndPortResolver;
-import com.example.util.SpringUtil;
 
-import org.apache.logging.log4j.LogManager;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,22 +15,23 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
+import java.util.concurrent.*;
 
 /*初始化配置类
-* 可以配置监听程序等*/
+ * 可以配置监听程序等*/
 @Component
 public class ConfigurationJobStartupRunner implements CommandLineRunner {
 
 
     private static Logger loggerInfo = LoggerFactory.getLogger("demo_info");
-    private  static Logger loggError = LoggerFactory.getLogger("demo_error");
+    private static Logger loggError = LoggerFactory.getLogger("demo_error");
     @Autowired
-    private  IpAndPortResolver ipAndPortResolver;
+    private IpAndPortResolver ipAndPortResolver;
     @Autowired
     @Qualifier("quartzManage")
     private QuartzManage quartzManage;
-    public void exeJudge(){
+
+    private void exeJudge() {
         /*DBListener dbListener=new DBListener();
         dbListener.init();*/
         loggerInfo.info("正在注册JudgeJob.....");
@@ -40,25 +40,21 @@ public class ConfigurationJobStartupRunner implements CommandLineRunner {
         qj.setTriggerName("judgeTrigger");
         qj.setCronExpression("0/10 * * * * ?");
         qj.setBeanName("com.example.quartz.job.JudgeJob");
-        try{
-            loggerInfo.info("正在执行\n");
-             if ( quartzManage.checkJobIfExists(qj)){
-                  quartzManage.resumeJob(qj);
-                 loggerInfo.info("已唤醒judgejob.\n");
-             }else{
-                 loggerInfo.info("不存在judgetrigger，正在添加......\n");
-                quartzManage.addJob(qj);}
-        } catch (SchedulerException se){
+        try {
+            loggerInfo.debug("正在执行\n");
+            if (quartzManage.checkJobIfExists(qj)) {
+                quartzManage.resumeJob(qj);
+                loggerInfo.info("已唤醒judgejob.\n");
+            } else {
+                loggerInfo.info("不存在judgetrigger，正在添加......\n");
+                quartzManage.addJob(qj);
+            }
+        } catch (SchedulerException | ClassNotFoundException | IllegalAccessException | InstantiationException se) {
             se.printStackTrace();
-        }catch(ClassNotFoundException cnfe){
-            cnfe.printStackTrace();
-        }catch(InstantiationException ie){
-            ie.printStackTrace();
-        }catch(IllegalAccessException iae){
-            iae.printStackTrace();
         }
     }
-    public void exePoll(){
+
+    private void exePoll() {
         /*DBListener dbListener=new DBListener();
         dbListener.init();*/
         loggerInfo.info("正在注册PollJob.....");
@@ -67,24 +63,41 @@ public class ConfigurationJobStartupRunner implements CommandLineRunner {
         qj.setTriggerName("pollTrigger");
         qj.setCronExpression("0/10 * * * * ?");
         qj.setBeanName("com.example.quartz.job.PollingJob");
-        try{
+        try {
             loggerInfo.info("正在执行\n");
-            if ( quartzManage.checkJobIfExists(qj)){
+            if (quartzManage.checkJobIfExists(qj)) {
                 quartzManage.resumeJob(qj);
-            }else{
+            } else {
                 loggerInfo.info("不存在polltrigger，正在添加......\n");
-                quartzManage.addJob(qj);}
-        } catch (SchedulerException se){
+                quartzManage.addJob(qj);
+            }
+        } catch (SchedulerException | ClassNotFoundException | InstantiationException | IllegalAccessException se) {
             se.printStackTrace();
-        }catch(ClassNotFoundException cnfe){
-            cnfe.printStackTrace();
-        }catch(InstantiationException ie){
-            ie.printStackTrace();
-        }catch(IllegalAccessException iae){
-            iae.printStackTrace();
         }
     }
-   /* * 测试*/
+    private void exeExcel() {
+        /*DBListener dbListener=new DBListener();
+        dbListener.init();*/
+        loggerInfo.info("正在注册ExcelJob.....");
+        QuartzJob qj = new QuartzJob();
+        qj.setJobName("excelJob");
+        qj.setTriggerName("excelTrigger");
+        qj.setCronExpression("0/30 * * * * ?");
+        qj.setBeanName("com.example.quartz.job.ExcelJob");
+        try {
+            loggerInfo.info("正在执行\n");
+            if (quartzManage.checkJobIfExists(qj)) {
+                quartzManage.resumeJob(qj);
+                loggerInfo.info("已唤醒judgejob.\n");
+            } else {
+                loggerInfo.info("不存在judgetrigger，正在添加......\n");
+                quartzManage.addJob(qj);
+            }
+        } catch (SchedulerException | ClassNotFoundException | IllegalAccessException | InstantiationException se) {
+            se.printStackTrace();
+        }
+    }
+    /* * 测试*/
     /*@Autowired
     private ArmgJobQServiceImpl armgJobQServiceImpl;
     public  void testfindall(){
@@ -105,10 +118,20 @@ public class ConfigurationJobStartupRunner implements CommandLineRunner {
         System.out.println("更新完成");*/
 
     @Override
-    public void run(String... args) throws Exception{
+    public void run(String... args) throws Exception {
         ipAndPortResolver.registerAddressAndId();
-        exeJudge();
-        exePoll();
+        ClientCconnect clientCconnect=ClientCconnect.getClientCconnectInstance();
+        clientCconnect.doConnnet();
+        ThreadFactory namedThreadFactory = new ThreadFactoryBuilder()
+                .setNameFormat("demo-pool-%d").build();
+        ExecutorService singleThreadPool = new ThreadPoolExecutor(2, 3,
+                20, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<Runnable>(1024), namedThreadFactory, new ThreadPoolExecutor.AbortPolicy());
+
+        singleThreadPool.execute(()-> exePoll());
+        singleThreadPool.execute(()-> exeJudge());
+        singleThreadPool.execute(()-> exeExcel());
+        singleThreadPool.shutdown();
         /* SpringUtil.t();*//*输出注册的bean,用于测试*/
     }
 }

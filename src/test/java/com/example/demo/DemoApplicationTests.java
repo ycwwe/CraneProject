@@ -1,31 +1,15 @@
 package com.example.demo;
 
 
-import com.example.communication.ComLink;
-import com.example.quartz.job.sender.SendJobToXCC;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 
 /*@SpringBootTest
 @RunWith(SpringRunner.class)*/
-public  class  DemoApplicationTests {
+public class DemoApplicationTests {
 /*
     @Before
     public void setUp() throws Exception {

@@ -23,7 +23,7 @@ public class QuartzManage {
     public void addJob(QuartzJob job) throws SchedulerException, ClassNotFoundException, IllegalAccessException, InstantiationException {
         //通过类名获取实体类，即要执行的定时任务的类
         Class<?> clazz = Class.forName(job.getBeanName());
-        Job jobEntity = (Job)clazz.newInstance();
+        Job jobEntity = (Job) clazz.newInstance();
         //通过实体类和任务名创建 JobDetail
         JobDetail jobDetail = newJob(jobEntity.getClass())
                 .withIdentity(job.getJobName()).build();
@@ -34,8 +34,8 @@ public class QuartzManage {
                 .withSchedule(CronScheduleBuilder.cronSchedule(job.getCronExpression()))
                 .build();
         //执行定时任务
-            scheduler.scheduleJob(jobDetail,cronTrigger);
-        }
+        scheduler.scheduleJob(jobDetail, cronTrigger);
+    }
         /*SchedulerFactory schedFact = new org.quartz.impl.StdSchedulerFactory();
 
         Scheduler sched = schedFact.getScheduler();
@@ -48,6 +48,7 @@ public class QuartzManage {
 
     /**
      * 更新job cron表达式
+     *
      * @param quartzJob
      * @throws SchedulerException
      */
@@ -59,8 +60,10 @@ public class QuartzManage {
         trigger = trigger.getTriggerBuilder().withIdentity(triggerKey).withSchedule(scheduleBuilder).build();
         scheduler.rescheduleJob(triggerKey, trigger);
     }
+
     /**
      * 删除一个job
+     *
      * @param quartzJob
      * @throws SchedulerException
      */
@@ -72,6 +75,7 @@ public class QuartzManage {
 
     /**
      * 恢复一个job
+     *
      * @param quartzJob
      * @throws SchedulerException
      */
@@ -80,8 +84,10 @@ public class QuartzManage {
         scheduler.resumeJob(jobKey);
 
     }
+
     /**
      * 立即执行job
+     *
      * @param quartzJob
      * @throws SchedulerException
      */
@@ -89,8 +95,10 @@ public class QuartzManage {
         JobKey jobKey = JobKey.jobKey(quartzJob.getJobName());
         scheduler.triggerJob(jobKey);
     }
+
     /**
      * 暂停一个job
+     *
      * @param quartzJob
      * @throws SchedulerException
      */
@@ -98,21 +106,23 @@ public class QuartzManage {
         JobKey jobKey = JobKey.jobKey(quartzJob.getJobName());
         scheduler.pauseJob(jobKey);
     }
+
     /*判断数据库中是否已存在某个job，存在返回值为true*/
-    public boolean checkJobIfExists(QuartzJob quartzJob) throws  SchedulerException{
-        boolean bool=false;
+    public boolean checkJobIfExists(QuartzJob quartzJob) throws SchedulerException {
+        boolean bool = false;
         JobKey jobKey = JobKey.jobKey(quartzJob.getJobName());
-        while(scheduler.checkExists(jobKey)){
-            for(Trigger trigger:scheduler.getTriggersOfJob(jobKey))
+        while (scheduler.checkExists(jobKey)) {
+            for (Trigger trigger : scheduler.getTriggersOfJob(jobKey)){
                 if (trigger.toString().equals(quartzJob.getTriggerName())) {
                     bool = true;
                     break;
                 }
-            if(bool){
-                System.out.println("DB中已存在(jobkey,trigger):("+jobKey+","+")\n"+"将重新运行DB已有的任务\n");
+            }
+            if (bool) {
+                System.out.println("DB中已存在(jobkey,trigger):(" + jobKey + "," + ")\n" + "将重新运行DB已有的任务\n");
             }
         }
-        return  bool;
+        return bool;
         /*JobKey jobKey = jobDetail.getKey();
        if( scheduler.checkExists(jobKey)){
            for(Trigger trigger :scheduler.getTriggersOfJob(jobKey)){
@@ -121,14 +131,15 @@ public class QuartzManage {
        }*/
 
     }
+
     /*启用所有数据库中存在的Job*/
-    public void startAllJobInStore() throws SchedulerException{
+    public void startAllJobInStore() throws SchedulerException {
         try {
             for (String jobGroupName : scheduler.getJobGroupNames()) {
                 JobKey jobKey = new JobKey(jobGroupName);
-                JobDetail jobDetail =  scheduler.getJobDetail(jobKey);
-                for(Trigger trigger:scheduler.getTriggersOfJob(jobKey)){
-                    scheduler.scheduleJob(jobDetail,trigger);
+                JobDetail jobDetail = scheduler.getJobDetail(jobKey);
+                for (Trigger trigger : scheduler.getTriggersOfJob(jobKey)) {
+                    scheduler.scheduleJob(jobDetail, trigger);
                 }
 
             }
@@ -137,7 +148,8 @@ public class QuartzManage {
         }
         ;
     }
-    public void shutDown(){
+
+    public void shutDown() {
         try {
             System.out.println("shutDown....执行完毕");
             scheduler.shutdown();
